@@ -5,8 +5,12 @@
 const struct protoptr net_protocols[TRINITY_PF_MAX] = {
 	[PF_UNIX] = { .proto = &proto_unix },
 	[PF_INET] = { .proto = &proto_ipv4 },
+#ifdef USE_NETAX25
 	[PF_AX25] = { .proto = &proto_ax25 },
+#endif
+#ifdef USE_IPX
 	[PF_IPX] = { .proto = &proto_ipx },
+#endif
 #ifdef USE_APPLETALK
 	[PF_APPLETALK] = { .proto = &proto_appletalk },
 #endif
@@ -16,7 +20,9 @@ const struct protoptr net_protocols[TRINITY_PF_MAX] = {
 #endif
 	[PF_DECnet] = { .proto = &proto_decnet },
 	[PF_PACKET] = { .proto = &proto_packet },
+#ifdef USE_NETECONET
 	[PF_ECONET] = { .proto = &proto_econet },
+#endif
 #ifdef USE_RDS
 	[PF_RDS] = { .proto = &proto_rds },
 #endif
