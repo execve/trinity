@@ -138,6 +138,12 @@ enum {
 #ifndef MADV_DODUMP
 #define MADV_DODUMP 17
 #endif
+#ifndef MADV_WIPEONFORK
+#define MADV_WIPEONFORK 18
+#endif
+#ifndef MADV_KEEPONFORK
+#define MADV_KEEPONFORK 19
+#endif
 
 
 /* bits/socket.h */
@@ -235,6 +241,10 @@ enum {
 #define PF_SMC		43
 #endif
 
+#ifndef PF_XDP
+#define PF_XDP		44
+#endif
+
 #ifndef NFC_SOCKPROTO_RAW
 #define NFC_SOCKPROTO_RAW	0
 #endif
@@ -248,6 +258,10 @@ enum {
 
 #ifndef MSG_BATCH
 #define MSG_BATCH 0x40000
+#endif
+
+#ifndef MSG_ZEROCOPY
+#define MSG_ZEROCOPY	0x4000000
 #endif
 
 #ifndef MSG_CMSG_CLOEXEC
@@ -362,6 +376,23 @@ enum {
 #define PR_CAP_AMBIENT		47
 #endif
 
+//TODO wtf were 48,49 ?
+
+// arm64 only
+#ifndef PR_SVE_SET_VL
+#define PR_SVE_SET_VL		50 
+#define PR_SVE_GET_VL           51
+#endif
+
+#ifndef PR_GET_SPECULATION_CTRL
+#define PR_GET_SPECULATION_CTRL         52
+#define PR_SET_SPECULATION_CTRL         53
+#endif
+
+// arm64 only
+#ifndef PR_PAC_RESET_KEYS
+#define PR_PAC_RESET_KEYS               54
+#endif
 
 /* linux/rds.h */
 #ifndef RDS_CANCEL_SENT_TO
@@ -525,6 +556,35 @@ enum kcmp_type {
 #define SO_PEERGROUPS           59
 #endif
 
+#ifndef SO_ZEROCOPY
+#define SO_ZEROCOPY	60
+#endif
+
+#ifndef SO_TXTIME
+#define SO_TXTIME               61
+#endif
+#ifndef SO_BINDTOIFINDEX
+#define SO_BINDTOIFINDEX        62
+#endif
+#ifndef SO_TIMESTAMP_NEW
+#define SO_TIMESTAMP_NEW        63
+#endif
+#ifndef SO_TIMESTAMPNS_NEW
+#define SO_TIMESTAMPNS_NEW      64
+#endif
+#ifndef SO_TIMESTAMPING_NEW
+#define SO_TIMESTAMPING_NEW     65
+#endif
+#ifndef SO_RCVTIMEO_NEW
+#define SO_RCVTIMEO_NEW         66
+#endif
+#ifndef SO_SNDTIMEO_NEW
+#define SO_SNDTIMEO_NEW         67
+#endif
+
+#ifndef SO_DETACH_REUSEPORT_BPF
+#define SO_DETACH_REUSEPORT_BPF 68
+#endif
 
 
 
@@ -596,6 +656,26 @@ enum kcmp_type {
 
 #ifndef TCP_MD5SIG_EXT
 #define TCP_MD5SIG_EXT		32
+#endif
+
+#ifndef TCP_FASTOPEN_KEY
+#define TCP_FASTOPEN_KEY        33      /* Set the key for Fast Open (cookie) */
+#endif
+
+#ifndef TCP_FASTOPEN_NO_COOKIE
+#define TCP_FASTOPEN_NO_COOKIE  34      /* Enable TFO without a TFO cookie */
+#endif
+
+#ifndef TCP_ZEROCOPY_RECEIVE
+#define TCP_ZEROCOPY_RECEIVE    35
+#endif
+
+#ifndef TCP_INQ
+#define TCP_INQ                 36      /* Notify bytes available to read as a cmsg on read */
+#endif
+
+#ifndef TCP_TX_DELAY
+#define TCP_TX_DELAY	37
 #endif
 
 /* linux/if_packet.h */
@@ -1174,6 +1254,11 @@ struct kvm_get_htab_fd {
 #define POLL_BUSY_LOOP 0x8000
 #endif
 
+/* asm/mman.h */
+#ifndef MLOCK_ONFAULT
+#define MLOCK_ONFAULT	0x01
+#endif
+
 /* linux/nvme_ioctl.h */
 #ifndef NVME_IOCTL_RESET
 #define NVME_IOCTL_RESET _IO('N', 0x44)
@@ -1196,4 +1281,22 @@ struct kvm_get_htab_fd {
 /* netfilter/ipset/ipset.h */
 #ifndef SO_IP_SET
 #define SO_IP_SET 83
+#endif
+
+/* linux/auto_fs4.h */
+#ifndef AUTOFS_IOC_EXPIRE_INDIRECT
+#define AUTOFS_IOC_EXPIRE_INDIRECT AUTOFS_IOC_EXPIRE_MULTI
+#endif
+#ifndef AUTOFS_IOC_EXPIRE_DIRECT
+#define AUTOFS_IOC_EXPIRE_DIRECT AUTOFS_IOC_EXPIRE_MULTI
+#endif
+
+/* linux/mount.h */
+#ifndef MOVE_MOUNT_F_SYMLINKS
+#define MOVE_MOUNT_F_SYMLINKS           0x00000001 /* Follow symlinks on from path */
+#define MOVE_MOUNT_F_AUTOMOUNTS         0x00000002 /* Follow automounts on from path */
+#define MOVE_MOUNT_F_EMPTY_PATH         0x00000004 /* Empty from path permitted */
+#define MOVE_MOUNT_T_SYMLINKS           0x00000010 /* Follow symlinks on to path */
+#define MOVE_MOUNT_T_AUTOMOUNTS         0x00000020 /* Follow automounts on to path */
+#define MOVE_MOUNT_T_EMPTY_PATH         0x00000040 /* Empty to path permitted */
 #endif

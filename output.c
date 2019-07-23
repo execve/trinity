@@ -3,8 +3,10 @@
 #include <stdarg.h>
 #include <unistd.h>
 #include "arg-decoder.h"
+#include "log.h"
 #include "pids.h"
 #include "params.h"	// quiet_level
+#include "shm.h"
 
 #define BUFSIZE 1024	// decoded syscall args are fprintf'd directly, this is for everything else.
 
@@ -20,6 +22,7 @@ void output(char level, const char *fmt, ...)
 {
 	va_list args;
 	int n;
+	FILE *handle;
 	pid_t pid;
 	char outputbuf[BUFSIZE];
 	char *prefix = NULL;
@@ -46,6 +49,7 @@ void output(char level, const char *fmt, ...)
 		childno = find_childno(pid);
 		snprintf(child_prefix, sizeof(child_prefix), "[child%u:%u] ", childno, pid);
 		prefix = child_prefix;
+		shm->children[childno]->logdirty = TRUE;
 	}
 
 skip_pid:
@@ -63,6 +67,17 @@ skip_pid:
 	if (quiet_level >= level) {
 		printf("%s%s", prefix, outputbuf);
 		(void)fflush(stdout);
+	}
+
+	/* go on with file logs only if enabled */
+	if (logging == LOGGING_FILES) {
+		handle = find_logfile_handle();
+		if (!handle)
+			return;
+
+		fprintf(handle, "%s %s", prefix, outputbuf);
+
+		(void)fflush(handle);
 	}
 }
 
@@ -91,9 +106,20 @@ void outputstd(const char *fmt, ...)
 
 void output_rendered_buffer(char *buffer)
 {
+	FILE *log_handle;
+
 	/* Output to stdout only if -q param is not specified */
 	if (quiet_level == MAX_LOGLEVEL) {
 		fprintf(stdout, "%s", buffer);
 		fflush(stdout);
+	}
+
+	if (logging == LOGGING_DISABLED)
+		return;
+
+	log_handle = find_logfile_handle();
+	if (log_handle != NULL) {
+		fprintf(log_handle, "%s", buffer);
+		fflush(log_handle);
 	}
 }

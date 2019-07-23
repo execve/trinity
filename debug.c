@@ -12,6 +12,7 @@
 #include <unistd.h>
 #include "child.h"
 #include "debug.h"
+#include "log.h"
 #include "params.h"
 #include "pids.h"
 #include "shm.h"
@@ -95,7 +96,7 @@ void dump_syscallrec(struct syscallrecord *rec)
 	output(0, " state:%d\n", rec->state);
 	output(0, " prebuffer : %p (len:%d)\n", rec->prebuffer, strlen(rec->prebuffer));
 	output(0, " -> %s\n", rec->prebuffer);
-	output(0, " postbuffer : %p (len:%d)\n", rec->postbuffer, strlen(rec->postbuffer));
+	output(0, " postbuffer : %p (len:%ld)\n", rec->postbuffer, strlen(rec->postbuffer));
 	output(0, " -> %s\n", rec->postbuffer);
 }
 
@@ -108,12 +109,15 @@ void dump_childdata(struct childdata *child)
 	output(0, "syscall: %p\n", &child->syscall);
 	dump_syscallrec(&child->syscall);
 
+	if (logging == LOGGING_FILES)
+		output(0, "logfile: %p (dirty:%d)\n", child->logfile, child->logdirty);
+
 	output(0, "objects: %p\n", child->objects);
 	//TODO: dump each objhead
 
-	output(0, " tp.tv_sec=%d tp.tv_nsec=%ld\n", child->tp.tv_sec, child->tp.tv_nsec);
+	output(0, " tp.tv_sec=%ld tp.tv_nsec=%ld\n", child->tp.tv_sec, child->tp.tv_nsec);
 
-	output(0, "seed: %ld\n", child->seed);
+	output(0, "seed: %u\n", child->seed);
 	output(0, "childnum: %d\n", child->num);
 
 	output(0, "killcount: %d\n", child->kill_count);

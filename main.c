@@ -12,6 +12,7 @@
 #include "child.h"
 #include "debug.h"
 #include "ftrace.h"
+#include "log.h"
 #include "params.h"
 #include "pids.h"
 #include "post-mortem.h"
@@ -184,7 +185,7 @@ static void kill_all_kids(void)
 
 /* if the first arg was an fd, find out which one it was.
  * Call with syscallrecord lock held. */
-unsigned int check_if_fd(struct syscallrecord *rec)
+unsigned int check_if_fd(struct childdata *child, struct syscallrecord *rec)
 {
 	struct syscallentry *entry;
 	unsigned int fd;
@@ -203,6 +204,14 @@ unsigned int check_if_fd(struct syscallrecord *rec)
 	/* if it's out of range, it's not going to be valid. */
 	if (fd > 1024)
 		return FALSE;
+
+	if (logging == LOGGING_FILES) {
+		if (child->logfile == NULL)
+			return FALSE;
+
+		if (fd <= (unsigned int) fileno(child->logfile))
+			return FALSE;
+	}
 
 	return TRUE;
 }
@@ -308,7 +317,7 @@ static void stuck_syscall_info(struct childdata *child)
 
 	/* we can only be 'stuck' if we're still doing the syscall. */
 	if (state == BEFORE) {
-		if (check_if_fd(rec) == TRUE) {
+		if (check_if_fd(child, rec) == TRUE) {
 			sprintf(fdstr, "(fd = %u)", (unsigned int) rec->a1);
 			shm->fd_lifetime = 0;
 			//close(rec->a1);
@@ -394,7 +403,7 @@ static bool is_child_making_progress(struct childdata *child)
 	if (diff < 40)
 		return FALSE;
 
-	debugf("sending another SIGKILL to child %d (pid:%u type:%u). [kill count:%d] [diff:%d]\n",
+	debugf("sending another SIGKILL to child %u (pid:%u type:%u). [kill count:%u] [diff:%lu]\n",
 		child->num, pid, child->type, child->kill_count, diff);
 	child->kill_count++;
 	kill_pid(pid);
@@ -557,8 +566,8 @@ static void handle_childsig(int childno, int childstatus, bool stop)
 			log_child_signalled(childno, pid, WTERMSIG(childstatus), child->op_nr);
 		}
 		reap_child(shm->children[childno]);
-
-		fclose(child->pidstatfile);
+		if (child->pidstatfile)
+			fclose(child->pidstatfile);
 		child->pidstatfile = NULL;
 
 		replace_child(childno);
@@ -774,7 +783,7 @@ void main_loop(void)
 		}
 
 		if (syscalls_todo && (shm->stats.op_count >= syscalls_todo)) {
-			output(0, "Reached limit %d. Telling children to exit.\n", syscalls_todo);
+			output(0, "Reached limit %lu. Telling children to exit.\n", syscalls_todo);
 			panic(EXIT_REACHED_COUNT);
 		}
 

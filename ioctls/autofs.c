@@ -8,6 +8,7 @@
 #include "shm.h"
 #include "syscall.h"
 #include "utils.h"
+#include "compat.h"
 
 /* include/linux/auto_dev-ioctl.h */
 /*
@@ -238,8 +239,15 @@ static const struct ioctl autofs_ioctls[] = {
 	IOCTL(AUTOFS_IOC_SETTIMEOUT),
 	IOCTL(AUTOFS_IOC_EXPIRE),
 	IOCTL(AUTOFS_IOC_EXPIRE_MULTI),
+	/* Both defines removed by kernel commit
+	 * 1f28c5d055032e7e8ee5e48198dca7e125d0eec6
+	 */
+#ifdef AUTOFS_IOC_EXPIRE_INDIRECT
 	IOCTL(AUTOFS_IOC_EXPIRE_INDIRECT),
+#endif
+#ifdef AUTOFS_IOC_EXPIRE_DIRECT
 	IOCTL(AUTOFS_IOC_EXPIRE_DIRECT),
+#endif
 	IOCTL(AUTOFS_IOC_PROTOSUBVER),
 	IOCTL(AUTOFS_IOC_ASKUMOUNT),
 

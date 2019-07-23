@@ -1,4 +1,4 @@
-VERSION="1.8pre"
+VERSION="2019.06"
 
 ifeq (,$(findstring pre,$(VERSION)))
 DEVEL = 0
@@ -46,6 +46,8 @@ CFLAGS += -Wwrite-strings
 CFLAGS += -Wno-format-nonliteral
 CFLAGS += -Wstrict-prototypes -Wmissing-prototypes
 CFLAGS += -fsigned-char
+# BPF spew.
+CFLAGS += -Wno-missing-field-initializers
 
 # needed for show_backtrace() to work correctly.
 LDFLAGS += -rdynamic
@@ -87,6 +89,7 @@ SYSCALLS_ARCH	:= $(shell case "$(MACHINE)" in \
 				  syscalls/x86/x86_64/*.c;; \
 		   (i?86*) echo syscalls/x86/*.c \
 				syscalls/x86/i386/*.c;; \
+		   (s390x*) echo syscalls/s390x/*.c ;; \
 		   esac)
 
 VERSION_H	:= include/version.h
